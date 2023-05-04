@@ -7,6 +7,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useEventListener } from '@vueuse/core'
 import * as BABYLON from 'babylonjs'
 import { CharacterController } from "babylonjs-charactercontroller";
+import * as Colyseus from "colyseus.js";
 
 export default {
   setup() {
@@ -14,10 +15,20 @@ export default {
     let engine = null
     let scene = null
     let box = null
+    let client = null
+    let room = null
 
     const init = () => {
       engine = new BABYLON.Engine(canvas.value, true)
       scene = new BABYLON.Scene(engine)
+      client = new Colyseus.Client("ws://localhost:2567");
+      console.log("Connecting to Colyseus server...");
+
+      //
+      // Connect with Colyseus server
+      //
+      room = client.joinOrCreate("my_room");
+      console.log("Connected to Colyseus server!");
 
       loadPlayer(scene, engine, canvas);
 
@@ -76,8 +87,6 @@ export default {
           var alpha = -player.rotation.y - 4.69;
           var beta = Math.PI / 2.5;
           var target = new BABYLON.Vector3(player.position.x, player.position.y + 1.5, player.position.z);
-
-          console.log("laoding meshes 1.1");
           var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", alpha, beta, 5, target, scene);
 
           //standard camera setting
